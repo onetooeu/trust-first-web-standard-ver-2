@@ -1,0 +1,12 @@
+[project]
+name = "tfws2-trust-api"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = [
+  "fastapi>=0.110",
+  "uvicorn>=0.27",
+  "jsonschema>=4.22.0",
+]
+
+[project.scripts]
+tfws2-trust-api = "trust_api.app:main"

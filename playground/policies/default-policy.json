@@ -1,0 +1,7 @@
+{
+  "min_grade_allow": "B",
+  "min_confidence_allow": 0.6,
+  "block_on": ["key_epoch_invalid", "signature_fail", "inventory_tamper"],
+  "quarantine_on": ["rollback_suspected", "missing_signatures"],
+  "warn_on": ["well_known_missing", "incidents_open"]
+}
