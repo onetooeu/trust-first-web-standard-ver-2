@@ -1,0 +1,8 @@
+{
+  "schema_version": "2.0",
+  "id": "INC-EXAMPLE-0001",
+  "status": "investigating",
+  "opened_at": "2025-12-25T00:00:00Z",
+  "summary": "Example incident object for schema validation.",
+  "impact": { "severity": "low", "scope": ["api"] }
+}

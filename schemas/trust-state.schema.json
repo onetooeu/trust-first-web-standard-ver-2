@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "TFWS v2 Trust State",
+  "type": "object",
+  "required": ["schema_version", "subject", "computed_at", "score", "signals"],
+  "properties": {
+    "schema_version": { "type": "string", "enum": ["2.0"] },
+    "subject": {
+      "type": "object",
+      "required": ["type", "id"],
+      "properties": {
+        "type": { "type": "string", "enum": ["domain", "org", "service", "endpoint"] },
+        "id": { "type": "string", "minLength": 3 }
+      },
+      "additionalProperties": false
+    },
+    "computed_at": { "type": "string", "format": "date-time" },
+    "valid_until": { "type": "string", "format": "date-time" },
+    "score": {
+      "type": "object",
+      "required": ["value", "confidence", "grade"],
+      "properties": {
+        "value": { "type": "number", "minimum": 0, "maximum": 100 },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+        "grade": { "type": "string", "enum": ["A", "B", "C", "D", "E", "F", "UNKNOWN"] }
+      },
+      "additionalProperties": false
+    },
+    "signals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["code", "weight", "result"],
+        "properties": {
+          "code": { "type": "string" },
+          "weight": { "type": "number", "minimum": -100, "maximum": 100 },
+          "result": { "type": "string", "enum": ["pass", "fail", "warn", "unknown"] },
+          "evidence": { "type": "array", "items": { "type": "string" } }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,9 @@
+{
+  "schema_version": "2.0",
+  "subject": { "type": "domain", "id": "onetoo.eu" },
+  "computed_at": "2025-12-25T00:00:00Z",
+  "score": { "value": 92, "confidence": 0.9, "grade": "A" },
+  "signals": [
+    { "code": "SIGNED_INVENTORY", "weight": 40, "result": "pass", "evidence": ["https://onetoo.eu/.well-known/minisign.pub"] }
+  ]
+}

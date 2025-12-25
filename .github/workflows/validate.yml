@@ -1,0 +1,14 @@
+name: validate
+on: [push, pull_request]
+jobs:
+  jsonschema:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install -U pip jsonschema
+      - run: python -m jsonschema -i examples/trust-state.example.json schemas/trust-state.schema.json
+      - run: python -m jsonschema -i examples/incident.example.json schemas/incident.schema.json
+      - run: python -m jsonschema -i examples/key-history.example.json schemas/key-history.schema.json

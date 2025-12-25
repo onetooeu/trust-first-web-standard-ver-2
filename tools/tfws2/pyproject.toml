@@ -1,0 +1,8 @@
+[project]
+name = "tfws2"
+version = "2.0.0b1"
+requires-python = ">=3.11"
+dependencies = ["jsonschema>=4.22.0"]
+
+[project.scripts]
+tfws2 = "tfws2.cli:main"
