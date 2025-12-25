@@ -4,6 +4,8 @@ from .hashwalk import hashwalk
 from .minisign_verify import verify_minisign_detached
 from .sim.rollback import simulate_rollback
 from .inventory_verify import verify_inventory
+from .key_epoch import check_key_epoch
+
 
 def main():
     ap = argparse.ArgumentParser(prog="tfws2")
@@ -18,19 +20,24 @@ def main():
     h.add_argument("--out", default="sha256.json")
 
     ms = sub.add_parser("verify-minisign", help="Verify minisign detached signature")
-    ms.add_argument("--pubkey", required=True, help="Path to minisign pubkey file")
-    ms.add_argument("--message", required=True, help="Path to message file (e.g., sha256.json)")
-    ms.add_argument("--sig", required=True, help="Path to .minisig file")
+    ms.add_argument("--pubkey", required=True)
+    ms.add_argument("--message", required=True)
+    ms.add_argument("--sig", required=True)
 
     vi = sub.add_parser("verify-inventory", help="Verify an inventory and auto-pick the correct signature file")
     vi.add_argument("--pubkey", required=True)
-    vi.add_argument("--inventory", required=True, help="Path to inventory file (e.g., sha256.json)")
-    vi.add_argument("--sigdir", default=None, help="Optional directory containing inventory signatures")
+    vi.add_argument("--inventory", required=True)
+    vi.add_argument("--sigdir", default=None)
+
+    ke = sub.add_parser("check-key-epoch", help="Check key epoch validity from key-history.json")
+    ke.add_argument("--key-history", required=True)
+    ke.add_argument("--kid", required=True)
+    ke.add_argument("--at", required=True, help="ISO8601 time (e.g. 2025-12-25T00:00:00Z)")
 
     sim = sub.add_parser("simulate-rollback", help="Simulate rollback/replay using two inventories")
-    sim.add_argument("--current", required=True, help="Path to current sha256.json")
-    sim.add_argument("--candidate", required=True, help="Path to candidate/older sha256.json")
-    sim.add_argument("--mode", default="hard-fail", choices=["hard-fail", "quarantine"], help="Decision mode")
+    sim.add_argument("--current", required=True)
+    sim.add_argument("--candidate", required=True)
+    sim.add_argument("--mode", default="hard-fail", choices=["hard-fail", "quarantine"])
 
     args = ap.parse_args()
 
@@ -56,6 +63,13 @@ def main():
         if not ok:
             raise SystemExit(f"FAIL: inventory verification failed ({info}) sig={sig_used}")
         print(f"OK: inventory verification passed sig={sig_used}")
+        return
+
+    if args.cmd == "check-key-epoch":
+        d = check_key_epoch(args.key_history, args.kid, args.at)
+        if not d.ok:
+            raise SystemExit(f"FAIL: {d.reason} kid={d.kid}")
+        print(f"OK: {d.reason} kid={d.kid}")
         return
 
     if args.cmd == "simulate-rollback":
