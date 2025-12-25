@@ -1,0 +1,14 @@
+{
+  "schema_version": "2.0",
+  "id": "INC-20251225-0001",
+  "status": "investigating",
+  "opened_at": "2025-12-25T12:00:00Z",
+  "summary": "Suspected signing key exposure; verification results are inconclusive.",
+  "impact": {
+    "severity": "high",
+    "scope": [
+      "signing",
+      "artifact-integrity"
+    ]
+  }
+}
