@@ -1,0 +1,32 @@
+{
+  "schema_version": "2.0",
+  "subject": {
+    "type": "domain",
+    "id": "example.com"
+  },
+  "computed_at": "2025-12-25T00:00:00Z",
+  "valid_until": "2026-01-01T00:00:00Z",
+  "score": {
+    "value": 92.5,
+    "confidence": 0.85,
+    "grade": "A"
+  },
+  "signals": [
+    {
+      "code": "well_known_present",
+      "weight": 10,
+      "result": "pass",
+      "evidence": [
+        "/.well-known/ai-trust-hub.json"
+      ]
+    },
+    {
+      "code": "signatures_valid",
+      "weight": 25,
+      "result": "unknown",
+      "evidence": [
+        "demo-only: no signatures checked"
+      ]
+    }
+  ]
+}
