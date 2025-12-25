@@ -9,6 +9,7 @@ import httpx
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import JSONResponse
 from jsonschema import Draft202012Validator
+from tfws2.minisign_verify import verify_minisign_detached
 
 
 ROOT = Path(__file__).resolve().parents[3]  # repo root
@@ -184,6 +185,13 @@ def build_trust_state_for_domain(domain: str) -> Dict[str, Any]:
         if s.get("code") == "key_history_present":
             s["result"] = kh_result
             s["evidence"] = kh_evidence
+
+    # inventory signature verification (minisign)
+    inv_result, inv_evidence = probe_inventory_signed(domain)
+    for s in signals:
+        if s.get("code") == "inventory_signed":
+            s["result"] = inv_result
+            s["evidence"] = inv_evidence
 
     score = score_from_signals(signals)
 
