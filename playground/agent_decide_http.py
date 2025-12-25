@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import json
 import sys
@@ -35,7 +35,6 @@ def decide(trust_state: Dict[str, Any], policy: Dict[str, Any]) -> Dict[str, Any
     signals = trust_state.get("signals") or []
     observed = [f"{s.get('code')}:{s.get('result')}" for s in signals if s.get("code")]
 
-    # Fast block/quarantine by signal code (if present)
     block_on = set(policy.get("block_on") or [])
     quarantine_on = set(policy.get("quarantine_on") or [])
     warn_on = set(policy.get("warn_on") or [])
@@ -62,23 +61,44 @@ def decide(trust_state: Dict[str, Any], policy: Dict[str, Any]) -> Dict[str, Any
                 "confidence": confidence,
             }
 
-    # Grade + confidence thresholds
     min_grade = policy.get("min_grade_allow", "B")
     min_conf = float(policy.get("min_confidence_allow", 0.6))
 
     if not grade_ge(grade, min_grade):
-        return {"decision": "block", "reason": "policy:grade_too_low", "observed": observed, "grade": grade, "confidence": confidence}
+        return {
+            "decision": "block",
+            "reason": "policy:grade_too_low",
+            "observed": observed,
+            "grade": grade,
+            "confidence": confidence,
+        }
 
     if confidence < min_conf:
-        # low confidence = warn (not block)
-        return {"decision": "warn", "reason": "policy:low_confidence", "observed": observed, "grade": grade, "confidence": confidence}
+        return {
+            "decision": "warn",
+            "reason": "policy:low_confidence",
+            "observed": observed,
+            "grade": grade,
+            "confidence": confidence,
+        }
 
-    # Warn signals
     for code in warn_on:
         if signal_results.get(code) in ("fail", "warn", "unknown"):
-            return {"decision": "warn", "reason": f"policy:warn_on:{code}", "observed": observed, "grade": grade, "confidence": confidence}
+            return {
+                "decision": "warn",
+                "reason": f"policy:warn_on:{code}",
+                "observed": observed,
+                "grade": grade,
+                "confidence": confidence,
+            }
 
-    return {"decision": "allow", "reason": "policy:pass", "observed": observed, "grade": grade, "confidence": confidence}
+    return {
+        "decision": "allow",
+        "reason": "policy:pass",
+        "observed": observed,
+        "grade": grade,
+        "confidence": confidence,
+    }
 
 
 def fetch_trust_state(api_base: str, domain: str) -> Dict[str, Any]:
