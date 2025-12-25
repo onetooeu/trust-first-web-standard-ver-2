@@ -68,6 +68,7 @@ def probe_ai_trust_hub(domain: str) -> Tuple[str, List[str]]:
         return "fail", [url]
     return "warn", [f"{url} (http:{status})"]
 
+
 def probe_minisign_pubkey(domain: str) -> Tuple[str, List[str]]:
     url = f"https://{domain}/.well-known/minisign.pub"
     timeout = 2.5
@@ -103,6 +104,7 @@ def probe_key_history(domain: str) -> Tuple[str, List[str]]:
     if status == 404:
         return "fail", [url]
     return "warn", [f"{url} (http:{status})"]
+
 
 def score_from_signals(signals: List[Dict[str, Any]]) -> Dict[str, Any]:
     """
@@ -154,7 +156,6 @@ def _basic_signals(domain: str) -> List[Dict[str, Any]]:
         {"code": "key_epoch_valid", "weight": 10, "result": "unknown", "evidence": ["key-history.json (optional)"]},
         {"code": "minisign_pubkey_present", "weight": 10, "result": "unknown", "evidence": ["/.well-known/minisign.pub"]},
         {"code": "key_history_present", "weight": 10, "result": "unknown", "evidence": ["/.well-known/key-history.json"]},
-
     ]
 
 
@@ -163,22 +164,26 @@ def build_trust_state_for_domain(domain: str) -> Dict[str, Any]:
 
     signals = _basic_signals(domain)
 
+    # 1) ai-trust-hub.json
     wk_result, wk_evidence = probe_ai_trust_hub(domain)
     for s in signals:
-        if s.get("code") == "well_known_present":    pk_result, pk_evidence = probe_minisign_pubkey(domain)
+        if s.get("code") == "well_known_present":
+            s["result"] = wk_result
+            s["evidence"] = wk_evidence
+
+    # 2) minisign.pub
+    pk_result, pk_evidence = probe_minisign_pubkey(domain)
     for s in signals:
         if s.get("code") == "minisign_pubkey_present":
             s["result"] = pk_result
             s["evidence"] = pk_evidence
 
+    # 3) key-history.json
     kh_result, kh_evidence = probe_key_history(domain)
     for s in signals:
         if s.get("code") == "key_history_present":
             s["result"] = kh_result
             s["evidence"] = kh_evidence
-
-            s["result"] = wk_result
-            s["evidence"] = wk_evidence
 
     score = score_from_signals(signals)
 
@@ -206,7 +211,7 @@ def get_trust_domain(domain: str):
 
 def main():
     import uvicorn
-    uvicorn.run("trust_api.app:app", host="127.0.0.1", port=8787, reload=True)
+    uvicorn.run("trust_api.app:app", host="127.0.0.1", port=8787, reload=False)
 
 
 if __name__ == "__main__":
