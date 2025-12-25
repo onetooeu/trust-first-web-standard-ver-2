@@ -68,6 +68,41 @@ def probe_ai_trust_hub(domain: str) -> Tuple[str, List[str]]:
         return "fail", [url]
     return "warn", [f"{url} (http:{status})"]
 
+def probe_minisign_pubkey(domain: str) -> Tuple[str, List[str]]:
+    url = f"https://{domain}/.well-known/minisign.pub"
+    timeout = 2.5
+    try:
+        with httpx.Client(timeout=timeout, follow_redirects=True) as client:
+            r = client.head(url)
+            status = r.status_code
+            if status in (405, 501):
+                r = client.get(url)
+                status = r.status_code
+    except Exception:
+        return "unknown", [url]
+
+    if status == 200:
+        return "pass", [url]
+    if status == 404:
+        return "fail", [url]
+    return "warn", [f"{url} (http:{status})"]
+
+
+def probe_key_history(domain: str) -> Tuple[str, List[str]]:
+    url = f"https://{domain}/.well-known/key-history.json"
+    timeout = 2.5
+    try:
+        with httpx.Client(timeout=timeout, follow_redirects=True) as client:
+            r = client.get(url)
+            status = r.status_code
+    except Exception:
+        return "unknown", [url]
+
+    if status == 200:
+        return "pass", [url]
+    if status == 404:
+        return "fail", [url]
+    return "warn", [f"{url} (http:{status})"]
 
 def score_from_signals(signals: List[Dict[str, Any]]) -> Dict[str, Any]:
     """
@@ -117,6 +152,9 @@ def _basic_signals(domain: str) -> List[Dict[str, Any]]:
         {"code": "well_known_present", "weight": 15, "result": "unknown", "evidence": ["/.well-known/ai-trust-hub.json"]},
         {"code": "inventory_signed", "weight": 15, "result": "unknown", "evidence": ["sha256.json.minisig (optional)"]},
         {"code": "key_epoch_valid", "weight": 10, "result": "unknown", "evidence": ["key-history.json (optional)"]},
+        {"code": "minisign_pubkey_present", "weight": 10, "result": "unknown", "evidence": ["/.well-known/minisign.pub"]},
+        {"code": "key_history_present", "weight": 10, "result": "unknown", "evidence": ["/.well-known/key-history.json"]},
+
     ]
 
 
@@ -127,7 +165,18 @@ def build_trust_state_for_domain(domain: str) -> Dict[str, Any]:
 
     wk_result, wk_evidence = probe_ai_trust_hub(domain)
     for s in signals:
-        if s.get("code") == "well_known_present":
+        if s.get("code") == "well_known_present":    pk_result, pk_evidence = probe_minisign_pubkey(domain)
+    for s in signals:
+        if s.get("code") == "minisign_pubkey_present":
+            s["result"] = pk_result
+            s["evidence"] = pk_evidence
+
+    kh_result, kh_evidence = probe_key_history(domain)
+    for s in signals:
+        if s.get("code") == "key_history_present":
+            s["result"] = kh_result
+            s["evidence"] = kh_evidence
+
             s["result"] = wk_result
             s["evidence"] = wk_evidence
 
