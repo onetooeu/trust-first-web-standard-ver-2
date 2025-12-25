@@ -216,3 +216,53 @@ def main():
 
 if __name__ == "__main__":
     main()
+def probe_inventory_signed(domain: str):
+    """
+    Verify inventory signature:
+    - minisign.pub
+    - dumps/sha256.json
+    - dumps/sha256.json.minisig
+    """
+    pub_url = f"https://{domain}/.well-known/minisign.pub"
+    inv_url = f"https://{domain}/dumps/sha256.json"
+    sig_url = f"https://{domain}/dumps/sha256.json.minisig"
+
+    try:
+        with httpx.Client(timeout=8.0, follow_redirects=True) as client:
+            pub_r = client.get(pub_url)
+            inv_r = client.get(inv_url)
+            sig_r = client.get(sig_url)
+
+        if pub_r.status_code != 200:
+            return ("fail" if pub_r.status_code == 404 else "warn"), [pub_url]
+        if inv_r.status_code != 200:
+            return ("fail" if inv_r.status_code == 404 else "warn"), [inv_url]
+        if sig_r.status_code != 200:
+            return ("fail" if sig_r.status_code == 404 else "warn"), [sig_url]
+
+        import tempfile
+        tmp = Path(tempfile.gettempdir()) / "tfws2_tmp"
+        tmp.mkdir(parents=True, exist_ok=True)
+
+        pub_p = tmp / "minisign.pub"
+        inv_p = tmp / "sha256.json"
+        sig_p = tmp / "sha256.json.minisig"
+
+        pub_p.write_bytes(pub_r.content)
+        inv_p.write_bytes(inv_r.content)
+        sig_p.write_bytes(sig_r.content)
+
+        ok, info = verify_minisign_detached(str(pub_p), str(inv_p), str(sig_p))
+        if ok:
+            return "pass", [inv_url, sig_url]
+        return "fail", [f"{sig_url} (bad signature)"]
+
+    except Exception as e:
+        return "unknown", [f"{inv_url} ({type(e).__name__})"]
+
+    # inventory signature verification (minisign)
+    inv_result, inv_evidence = probe_inventory_signed(domain)
+    for s in signals:
+        if s.get("code") == "inventory_signed":
+            s["result"] = inv_result
+            s["evidence"] = inv_evidence
