@@ -1,0 +1,20 @@
+{
+  "schema_version": "2.0",
+  "keys": [
+    {
+      "kid": "KID1",
+      "pubkey_path": "/.well-known/minisign.pub",
+      "not_before": "2025-12-25T00:00:00Z",
+      "status": "active",
+      "notes": "Initial signing key for TFWS v2 artifacts."
+    },
+    {
+      "kid": "KID0",
+      "pubkey_path": "/.well-known/minisign.pub",
+      "not_before": "2024-01-01T00:00:00Z",
+      "not_after": "2025-12-25T00:00:00Z",
+      "status": "retired",
+      "notes": "Previous key retired after rotation."
+    }
+  ]
+}
