@@ -4,3 +4,6 @@ __pycache__/
 *.pyd
 *.egg-info/
 .venv/
+
+# Windows/Git Bash artifact
+NUL
