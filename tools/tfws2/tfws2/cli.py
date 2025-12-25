@@ -22,12 +22,12 @@ def main():
     ms.add_argument("--message", required=True, help="Path to message file (e.g., sha256.json)")
     ms.add_argument("--sig", required=True, help="Path to .minisig file")
 
-        vi = sub.add_parser("verify-inventory", help="Verify an inventory and auto-pick the correct signature file")
+    vi = sub.add_parser("verify-inventory", help="Verify an inventory and auto-pick the correct signature file")
     vi.add_argument("--pubkey", required=True)
     vi.add_argument("--inventory", required=True, help="Path to inventory file (e.g., sha256.json)")
     vi.add_argument("--sigdir", default=None, help="Optional directory containing inventory signatures")
-    
-sim = sub.add_parser("simulate-rollback", help="Simulate rollback/replay using two inventories")
+
+    sim = sub.add_parser("simulate-rollback", help="Simulate rollback/replay using two inventories")
     sim.add_argument("--current", required=True, help="Path to current sha256.json")
     sim.add_argument("--candidate", required=True, help="Path to candidate/older sha256.json")
     sim.add_argument("--mode", default="hard-fail", choices=["hard-fail", "quarantine"], help="Decision mode")
@@ -51,14 +51,14 @@ sim = sub.add_parser("simulate-rollback", help="Simulate rollback/replay using t
         print("OK: minisign verification passed")
         return
 
-        if args.cmd == "verify-inventory":
+    if args.cmd == "verify-inventory":
         ok, info, sig_used = verify_inventory(args.pubkey, args.inventory, sigdir=args.sigdir)
         if not ok:
             raise SystemExit(f"FAIL: inventory verification failed ({info}) sig={sig_used}")
         print(f"OK: inventory verification passed sig={sig_used}")
         return
 
-if args.cmd == "simulate-rollback":
+    if args.cmd == "simulate-rollback":
         decision = simulate_rollback(args.current, args.candidate, mode=args.mode)
         print(decision)
         return
