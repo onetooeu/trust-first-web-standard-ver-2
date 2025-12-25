@@ -7,3 +7,6 @@ __pycache__/
 
 # Windows/Git Bash artifact
 NUL
+
+# Terminal captures (mintty)
+mintty.*
